@@ -1,0 +1,12 @@
+package com.example.hw5_android;
+
+public class TemperatureAlarmManager extends BroadcastReceiver {
+
+    Context _context;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            _context= context;
+            //connect to server..
+
+        }
+}

@@ -1,6 +1,8 @@
 package com.example.hw5_android;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAdapter.LeScanCallback;
 import android.bluetooth.BluetoothDevice;
@@ -8,11 +10,14 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.nio.ByteBuffer;
@@ -33,13 +38,18 @@ public class MainActivity extends Activity {
 
     // UI elements
     private TextView messages;
-    private EditText input;
+    private Button btnOn, btnOff;
+    private TextView temp;
 
     // BTLE state
     private BluetoothAdapter adapter;
     private BluetoothGatt gatt;
     private BluetoothGattCharacteristic tx;
     private BluetoothGattCharacteristic rx;
+    
+    // Temperature polling
+    private Handler handler;
+    private int updateInterval = 1000;
 
     // Main BTLE device callback where much of the logic occurs.
     private BluetoothGattCallback callback = new BluetoothGattCallback() {
@@ -100,6 +110,7 @@ public class MainActivity extends Activity {
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
             writeLine("Received: " + characteristic.getStringValue(0));
+        	updateTemp(characteristic.getStringValue(0));
         }
     };
 
@@ -108,9 +119,9 @@ public class MainActivity extends Activity {
         // Called when a device is found.
         @Override
         public void onLeScan(BluetoothDevice bluetoothDevice, int i, byte[] bytes) {
-            writeLine("Found device: " + bluetoothDevice.getAddress());
-            // Check if the device has the UART service.
-            if (parseUUIDs(bytes).contains(UART_UUID)) {
+            writeLine("Found device: " + bluetoothDevice.getAddress() + " with name " + bluetoothDevice.getName());
+            // Check if the device has the UART service and is called pgao
+            if (parseUUIDs(bytes).contains(UART_UUID) && bluetoothDevice.getName().equals("pgao")) {
                 // Found a device, stop the scan.
                 adapter.stopLeScan(scanCallback);
                 writeLine("Found UART service!");
@@ -129,10 +140,38 @@ public class MainActivity extends Activity {
 
         // Grab references to UI elements.
         messages = (TextView) findViewById(R.id.messages);
-        input = (EditText) findViewById(R.id.input);
+        btnOn = (Button) findViewById(R.id.btnOn);
+        btnOff = (Button) findViewById(R.id.btnOff);
+        temp = (TextView) findViewById(R.id.temp);
+        
+        btnOn.setOnClickListener(new OnClickListener() {
+        	public void onClick(View v) {
+        		sendMessage("1");
+            }
+        });
+        
+        btnOff.setOnClickListener(new OnClickListener() {
+        	public void onClick(View v) {
+        		sendMessage("0");
+            }
+        });
 
         adapter = BluetoothAdapter.getDefaultAdapter();
+        
+        handler = new Handler();
+        updateTemp.run();
     }
+
+    // Update temperature reading
+    private Runnable updateTemp = new Runnable() {
+        public void run() {
+	        if (tx != null) {
+	            // Only poll if we have a connection
+	        	sendMessage("p");
+	        }
+            handler.postDelayed(updateTemp, updateInterval);
+        }
+    };
 
     // OnResume, called right before UI is displayed.  Start the BTLE connection.
     @Override
@@ -158,9 +197,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    // Handler for mouse click on the send button.
-    public void sendClick(View view) {
-        String message = input.getText().toString();
+    public void sendMessage(String message) {
         if (tx == null || message == null || message.isEmpty()) {
             // Do nothing if there is no device or message to send.
             return;
@@ -184,6 +221,15 @@ public class MainActivity extends Activity {
             public void run() {
                 messages.append(text);
                 messages.append("\n");
+            }
+        });
+    }
+    
+    private void updateTemp(final CharSequence text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                temp.setText(text);
             }
         });
     }

@@ -8,34 +8,64 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.hw5_android.MainActivity" >
 
-    <Button
-        android:id="@+id/send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:text="Send"
-        android:onClick="sendClick"/>
-
-    <EditText
-        android:id="@+id/input"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/send"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"/>
-
     <ScrollView
+        android:id="@+id/scrollView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/send"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/btnOn" >
 
         <TextView
             android:id="@+id/messages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
     </ScrollView>
+
+    <Button
+        android:id="@+id/btnOff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/btnOn"
+        android:layout_alignBottom="@+id/btnOn"
+        android:layout_alignRight="@+id/scrollView1"
+        android:layout_marginRight="65dp"
+        android:text="Off" />
+
+    <Button
+        android:id="@+id/btnOn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="44dp"
+        android:layout_marginTop="112dp"
+        android:layout_toLeftOf="@+id/btnOff"
+        android:text="On" />
+
+    <TextView
+        android:id="@+id/tempLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/btnOn"
+        android:layout_marginTop="20dp"
+        android:text="Temperature:" />
+
+    <TextView
+        android:id="@+id/fanLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnOff"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="14dp"
+        android:text="Fan Control:" />
+
+    <TextView
+        android:id="@+id/temp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/tempLabel"
+        android:layout_alignBottom="@+id/tempLabel"
+        android:layout_alignLeft="@+id/btnOff"
+        android:text="0.0" />
 
 </RelativeLayout>
